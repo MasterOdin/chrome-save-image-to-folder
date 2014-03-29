@@ -4,11 +4,14 @@ jQuery(document).ready(function() {
     var folders = JSON.parse(localStorage.getItem('folders'));
     for (var i = 0; i < Object.keys(folders).length; i++) {
         jQuery('.folder-list').append("<div class='folder-elem' id='"+i+"'>"+
-            "Folder <span class='num'>"+(i+1)+"</span>: <input type='input' name='folders[]' "+
+            "Folder <input type='input' name='num' class='num' value='"+(i+1)+"' size='4' />: "+
+            "<input type='input' name='folders[]' "+
             "id='"+i+"' class='folder' value='"+folders[i]+"' />"+
             "&nbsp;<input type='submit' class='minus' value='-' /></div>");
-        minus_click(this);
     }
+    minus_click();
+    change_num();
+
     var total = Object.keys(folders).length
     jQuery('input.folder').each(function() {
         if (count >= Object.keys(folders).length) {
@@ -20,7 +23,8 @@ jQuery(document).ready(function() {
 
     jQuery('input.add').click(function() {
         jQuery('.folder-list').append("<div id='"+total+"'>"+
-            "Folder <span class='num'>"+(total+1)+"</span>: <input type='input name='folders[]' "+
+            "Folder <input type='input' name='num' class='num' value='"+(total+1)+"' size='4' />: "+
+            "<input type='input name='folders[]' "+
             "id='"+total+"' class='folder' value='' />"+
             "&nbsp;<input type='submit' class='minus' value='-' /></div>");
         minus_click(this);       
@@ -29,23 +33,47 @@ jQuery(document).ready(function() {
 
     jQuery('input.submit').click(function() {
         count = 0;
+        save = {};
         jQuery('input.folder').each(function() {
             if (jQuery(this).val() != "")
-                folders[count++] = jQuery(this).val();
+                save[count++] = jQuery(this).val();
         });
-        localStorage.setItem('folders',JSON.stringify(folders));
+        localStorage.setItem('folders',JSON.stringify(save));
         chrome.runtime.reload();
     });
 });
 
-function minus_click(that) {
+function minus_click() {
+    // make sure we only bind one click to the minus buttons
+    jQuery('.minus').unbind("click");
     jQuery('.minus').click(function() {
         jQuery(this).parent().remove();
         var count = 0;
-        jQuery('.folder-elem').each(function() {
-            jQuery(this).children(0).text((count+1));
-            jQuery(this).children(1).attr("id",count);
+        jQuery('.num').each(function() {
+            jQuery(this).val((count+1));
+            jQuery(this).parent().children(1).attr('id',count);
             count++;
+        });
+    });
+}
+
+function change_num() {
+    jQuery('.num').focus(function() {
+        var old_val = jQuery(this).val();
+        jQuery(this).change(function() {
+            var new_val = jQuery(this).val();
+            var count = 0;
+            var adjust = 0;
+            var that = this;
+            jQuery('.folder-elem').each(function() {
+                if (count == new_val) {
+                    adjust += 1;
+                }
+                else {
+
+                }
+                count++;
+            });
         });
     });
 }
